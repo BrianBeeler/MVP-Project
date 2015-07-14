@@ -13,9 +13,11 @@
           {{> course }}
          {{/each}}
       </ul>
-      <form class="new-course">
+      <ul>
+      <form  class="new-course">
         <input type="text" name="text" placeholder="Type to add new course" />
       </form>
+    </ul>
   </div>
 </body>
 
@@ -33,13 +35,13 @@
               <span class="text"> {{text}} </span>
             </td>
 
-            <td style="width:30%">
-              <span class="text">
-                 Class Grade:
-              </span>
+            <td style="width:50%">
+          
+                 Current Grade:
+             
             </td>
             <td>
-              <span>  &nbsp; &nbsp; &nbsp; 100% </span>
+              <span>  &nbsp; &nbsp; &nbsp; {{weightedAvg}} </span>
             </td>
 
           </tr>

@@ -14,6 +14,9 @@ Criteria = new Mongo.Collection("criteria")
   Template.course.helpers({
     criteria: function () {
       return this.criteria;
+    },
+    avg: function () {
+      return this.average
     }
   })
 
@@ -27,24 +30,38 @@ Criteria = new Mongo.Collection("criteria")
 
   })
 
-  Template.critItem.onRendered({
-    setAvg: function() {
-      console.log("Rendered")
-      var sum = 0
-      for (var i =0; i < this.grades.length; i++) {
-        sum+=grades[text]*1;
-      }
-      if (this.grades.length<1) {
-        this.avg="-"
-      }
-      else {
-        this.avg=sum/this.length;
+  function average(array) {
+    var sum = 0;
+    //console.log(array)
+    for (var i=0; i<array.length; i++) {
+      sum+=1*array[i].text;
+    }
+    
+    result = Math.floor(sum/array.length);
+    
+    if (isNaN(result)) {
+      return "-"
+    }
+
+    return result
+
+  }
+
+  function findWeightedAvg(criteriaArray) {
+    var num=0;
+    var den=0;
+
+    for (var i=0; i<criteriaArray.length; i++) {
+      if (typeof criteriaArray[i].critAvg==="number") {
+      num+= 1*criteriaArray[i].critAvg*criteriaArray[i].weight
+      den+= 1*criteriaArray[i].weight;
       }
     }
 
-  })
+    if (den===0) {return "-"}
+    else {return Math.round(num/den) }
 
-
+  }
 
   Template.body.events({
 
@@ -53,7 +70,8 @@ Criteria = new Mongo.Collection("criteria")
       Courses.insert({
         text: text,
         createdAt: new Date(),
-        criteria : []
+        criteria : [],
+        weightedAvg: ""
       });
       event.target.text.value = "";
         return false;
@@ -79,6 +97,9 @@ Criteria = new Mongo.Collection("criteria")
       var crits  = this.criteria;
       crits.push(newCriteria);
       Courses.update(this._id, {$set: { criteria: crits }})
+
+      event.target.inputCriteria.value = ""
+      event.target.inputPercent.value = ""
     }
   })
 
@@ -91,7 +112,11 @@ Criteria = new Mongo.Collection("criteria")
           i=crit.length;
         }
       }
-      Courses.update(this.parent, {$set: { criteria: crit }})
+
+      var wAvg = findWeightedAvg(crit)
+      Courses.update(this.parent, {$set: { criteria: crit,
+                                            weightedAvg: wAvg
+                                                         }})
     },
    "submit" : function (event) {
      event.preventDefault();
@@ -119,10 +144,25 @@ Criteria = new Mongo.Collection("criteria")
        gradesArray.push(newGrade);
      }
 
+     var avg = average(gradesArray)
+     console.log(avg)
+
+     
+
      gp[0].criteria[thisIndex].grades = gradesArray;
      newCriteria = gp[0].criteria
+     newCriteria[thisIndex].critAvg = avg;
 
      Courses.update(newGrade.grandparent, {$set: { criteria: newCriteria }})
+     
+     gp = Courses.find(newGrade.grandparent).fetch()
+     
+     var wAvg = findWeightedAvg(gp[0].criteria)
+
+     Courses.update(newGrade.grandparent, {$set: { weightedAvg: wAvg }})
+     event.target.gradeInput.value=''
+
+     //Template.critItem.rendered();
    }
   })
 
@@ -154,8 +194,12 @@ Criteria = new Mongo.Collection("criteria")
       crit[critIndex].grades = grades2
       //crit.splice(critIndex,1,grades)
 
+      debugger;
+      crit[critIndex].critAvg = average(crit[critIndex].grades);
+      
 
-      Courses.update(this.grandparent, {$set: { criteria: crit }})
+      var wAvg = findWeightedAvg(crit)
+      Courses.update(this.grandparent, {$set: { criteria: crit, weightedAvg: wAvg }})
 
     }
 
