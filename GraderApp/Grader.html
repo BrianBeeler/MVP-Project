@@ -29,7 +29,7 @@
       <br>
         <table style="font-weight: 900">
           <tr>
-            <td style="width:30%">
+            <td style="width:25%">
               <span class="text"> {{text}} </span>
             </td>
 
@@ -47,8 +47,8 @@
 
         <ul>
           {{ #each criteria }}
-            {{> critItem }}
-          {{/each      }}
+            {{ > critItem }}
+          {{ /each          }}
          </ul>
 
       <form class="new-criteria">
@@ -68,18 +68,43 @@
 
 <template name="critItem">
   <table style="width:100%">
+
     <tr>
-      <td style="width:31%">
+      <td style="width:20%">
         <span class="text"> &nbsp; &nbsp; {{this.text}}</span>
       </td>
       <td style="width:25%">
-        <span class="text">
-        Weight &nbsp; &nbsp; {{this.weight }}%  </span>
+        <span class="text" style="float:left">
+        Weight {{this.weight }}%  </span>
+      </td>
+      <td>
+        <span class="text" style="float:left">
+        Average {{this.critAvg}} </span>
       </td>
       <td style="width:20%">
         <button class="delete" style="float:left">&times;</button>
       </td>
     </tr>
+       <tr>
+          {{ #each grades }}
+            {{ > grade }}
+          {{ /each          }}
+       </tr>
+
+        <form  class="gradeInput" style= "float:right" >
+        <input style= "float:right" type="text" name="gradeInput" class="gradeInput" placeholder="Input Grades (%)" />
+        </form>
+
+         <tr> _____________________________________________
+         </tr>
+
   </table>
+</template>
+
+<template name="grade">
+    <li>
+      <button class="deleteGrade" style="float:right">&times;</button>
+      <span style="float: right">{{this.text}} &nbsp; % </span>
+    </li>
 </template>
 
